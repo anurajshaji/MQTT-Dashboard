@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .data-container {
+            display: inline-block;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        #distance {
+            font-size: 36px;
+            font-weight: bold;
+            color: #009688;
+        }
+        .status {
+            margin-top: 10px;
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Aggregate distance calculated</h1>
+    <div class="data-container">
+        <p>Distance Data:</p>
+        <p id="distance">-- cm</p>
+        <p class="status" id="status">Disconnected</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/mqttws31.min.js"></script>
+    <script>
+        // Define MQTT settings
+        const mqttBroker = 'broker.hivemq.com'; // WebSocket address for the broker
+        const mqttClientId = 'mqttx_adc2ba01';
+        const mqttTopic = 'esp8266/ultra/dismeasure'; // Replace with your MQTT topic
+        let client;
+
+        // Function to initialize the MQTT client
+        function initMQTT() {
+            client = new Paho.MQTT.Client(mqttBroker, mqttClientId);
+
+            // Set callback handlers
+            client.onConnectionLost = onConnectionLost;
+            client.onMessageArrived = onMessageArrived;
+
+            // Connect the client
+            client.connect({
+                onSuccess: onConnect,
+                onFailure: onFailure,
+            });
+        }
+
+        // Called when the client connects
+        function onConnect() {
+            document.getElementById('status').innerText = 'Connected';
+            document.getElementById('status').style.color = '#388E3C';
+            console.log('Connected to broker');
+            // Subscribe to the topic
+            client.subscribe(mqttTopic);
+        }
+
+        // Called when the client fails to connect
+        function onFailure(error) {
+            document.getElementById('status').innerText = 'Failed to Connect';
+            document.getElementById('status').style.color = '#D32F2F';
+            console.error('Connection failed: ', error);
+        }
+
+        // Called when the connection is lost
+        function onConnectionLost(responseObject) {
+            if (responseObject.errorCode !== 0) {
+                document.getElementById('status').innerText = 'Disconnected';
+                document.getElementById('status').style.color = '#D32F2F';
+                console.log('Connection lost: ' + responseObject.errorMessage);
+            }
+        }
+
+        // Called when a message arrives
+        function onMessageArrived(message) {
+            console.log('Message Arrived: ' + message.payloadString);
+            document.getElementById('distance').innerText = message.payloadString + ' cm';
+        }
+
+        // Initialize the MQTT connection when the page loads
+        window.onload = function () {
+            initMQTT();
+        };
+    </script>
+
+</body>
+</html>
