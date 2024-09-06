@@ -33,7 +33,7 @@
 </head>
 <body>
 
-    <h1>Aggregate distance calculated</h1>
+    <h1>Aggregate distance</h1>
     <div class="data-container">
         <p>Distance Data:</p>
         <p id="distance">-- cm</p>
@@ -44,7 +44,7 @@
     <script>
         // Define MQTT settings
         const mqttBroker = 'broker.hivemq.com'; // WebSocket address for the broker
-        const mqttClientId = 'mqttx_adc2ba01';
+        const mqttClientId = 'mqttjs_' + Math.random().toString(16).substr(2, 8);
         const mqttTopic = 'esp8266/ultra/dismeasure'; // Replace with your MQTT topic
         let client;
 
